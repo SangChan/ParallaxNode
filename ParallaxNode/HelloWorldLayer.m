@@ -230,6 +230,46 @@ enum {
         newPos.x = -(IMG_WIDTH - winSize.width)/bgParallaxRatio;
     }
     
-    voidNode.position = newPos;
+    
+    // 드래곤이 화면 가운데 있을 경우에만 배경을 움직인다.
+    CGFloat halfWinWidth = winSize.width / 2;
+    if(self.dragon.position.x == halfWinWidth)
+        voidNode.position = newPos;
+
+    // 만약 드래곤이 화면 가운데 있지않을 경우에는 드래곤을 화면가운데까지
+    // 이동하게 한다.
+    
+    if(isRightPressed == YES && self.dragon.position.x < halfWinWidth) {
+        // moveStep.x의 부호를 바꾼 이유는 배경과 드래곤의 움직임 방향이 서로 반대이기 때문이다.
+        self.dragon.position = ccp(self.dragon.position.x + (moveStep.x * -1),
+                                   self.dragon.position.y);
+        // 가운데 이상 움직이지 않도록 체크한다.
+        if(self.dragon.position.x > halfWinWidth)
+            self.dragon.position = ccp(halfWinWidth, self.dragon.position.y);
+    }else if(isLeftPressed == YES && self.dragon.position.x > halfWinWidth) {
+        // moveStep.x의 부호를 바꾼 이유는 배경과 주인공의 움직임 방향이 서로 반대이기 때문이다.
+        self.dragon.position = ccp(self.dragon.position.x + (moveStep.x * -1),
+                                   self.dragon.position.y);
+        
+        // 가운데 이상 움직이지 않도록 체크한다.
+        if(self.dragon.position.x < halfWinWidth)
+            self.dragon.position = ccp(halfWinWidth, self.dragon.position.y);
+    }
+
+    
+    // 배경의 끝에 도달하면 배경은 움직이지 않고 드래곤을 화면 끝까지 이동시킨다.
+    if(newPos.x == 0 || newPos.x == -(IMG_WIDTH - winSize.width)) {
+        CGPoint newDragonPos = ccp(self.dragon.position.x + (moveStep.x * -1), self.dragon.position.y);
+        
+        // 드래곤이 화면의 왼쪽 또는 오른쪽 끝까지 도달했을 때는 더 이상 움직이지 않는다.
+        CGFloat halfWidth = self.dragon.contentSize.width / 2;
+        if(newDragonPos.x <= halfWidth)
+            newDragonPos.x = halfWidth;
+        else if(newDragonPos.x >= winSize.width - halfWidth)
+            newDragonPos.x = winSize.width - halfWidth;
+        
+        self.dragon.position = newDragonPos;
+    }
+
 }
 @end
